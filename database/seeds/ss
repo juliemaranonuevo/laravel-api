@@ -1,0 +1,118 @@
+<?php
+
+use Illuminate\Database\Seeder;
+use App\Province;
+use App\Town;
+use App\Barangay;
+
+class PBTSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+
+        \DB::table('tbl_provinces')->delete();
+        \DB::table('tbl_towns')->delete();
+        \DB::table('tbl_barangays')->delete();
+
+        $pbts = array(
+            array ( 
+                'province_name' => 'Laguna',
+                array (
+                    'town_name' => 'Lumban',
+                    array ( 
+                        'barangay_name' => 'Bagong Silang',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Balimbingan',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Balubad',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Caliraya',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Concepcion',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Lewin',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Maracta',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Maytalang I',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Maytalang II',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Primera Parang',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Primera Pulo',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Salac',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Segunda Parang',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Segunda Pulo',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Santo Niño',
+                    ),
+                    array ( 
+                        'barangay_name' => 'Wawa',
+                    ),
+                )
+            )
+        );
+
+        $pbtArrays = $pbts;
+        $province_count = count( $pbts );
+        $tcount = 0;
+
+        for ( $x = 0; $x<$province_count; $x++) {
+
+            $province = new Province;
+            $province->province_name = $pbts[$x]['province_name'];
+            $province->status = true;
+            $province->save();
+
+            $town_count = count( $pbts[$x] );
+            dd($town_count);
+            $bcount = 0;
+
+            for ( $y = 0; $y<$town_count; $y++) { 
+
+                $town = new Town;
+                $town->town_name = $pbts[$x][$y]['town_name'];
+                $town->status = true;
+                $town->province_id = $province->id;
+                $town->save();
+
+                $barangay_count = count( $pbts[$x][$y][$bcount] );
+
+                for ( $z = 0; $z<$barangay_count; $z++) { 
+
+                    $barangay = new Barangay;
+                    $barangay->barangay_name = $pbts[$x][$y][$z]['barangay_name'];
+                    $barangay->status = true;
+                    $barangay->town_id = $town->id;
+                    $barangay->save();
+    
+                }
+
+            }
+
+        }
+    }
+}
