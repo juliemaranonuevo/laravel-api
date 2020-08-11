@@ -22,22 +22,12 @@ class AuthService {
         $isUserExists = $this->repository->isUserExists($user);
 
         if ($isUserExists) {
-
+           
             $userData = $this->repository->getUserData($user);
             // $accessToken = $this->tokenService->createToken($userData->id);
             $accessToken = $this->tokenService->createToken($userData);
 
-            return response()->json([
-                'accessToken' => $accessToken, 
-                'id' => $userData->id,
-                'email' => $userData->email,
-                'role_type' => $userData->role_type
-            ]);
-
-            // return response()->json([
-            //     'accessToken' => $accessToken, 
-            //     'userData' => $userData
-            // ]);
+            return response()->json(['accessToken' => $accessToken]);
 
         } else {
 
@@ -49,19 +39,36 @@ class AuthService {
     public function signupstore(UserData $userData): JsonResponse {
 
         $isSuccessful = $this->repository->signupstore($userData);
-    
-        if ($isSuccessful) { 
+        // dd($isSuccessful);
 
+        if ($isSuccessful->success == true) { 
             $accessToken = $this->tokenService->createToken($isSuccessful);
 
             return response()->json(['accessToken' => $accessToken]);
 
         } else {
 
-            return response()->json(['message' => 'Invalid Credential'], 401);
+            if ($isSuccessful->error_code == 409) { 
+                // $message = "Duplicate Entry!";
+                $message = $isSuccessful->error_message;
+                $code = 409 ;
+            } else {
+                $message = "Something went wrong in the server. Please try again.";
+                $code = 0;
+            }
+
+            return response()->json(['message' => $message], $code);
 
         }
         
+    }
+
+    public function isExistsInAuth(string $uniqueInSignUp): JsonResponse {
+
+        $isExistsInAuth = $this->repository->isExistsInAuth($uniqueInSignUp);
+
+        return response()->json($isExistsInAuth);
+
     }
 
     public function logout(string $accountId): JsonResponse {

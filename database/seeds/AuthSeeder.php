@@ -1,8 +1,9 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use App\User;
 use App\AuthMediator;
+use App\User;
+use App\Role;
 
 class AuthSeeder extends Seeder
 {
@@ -44,6 +45,7 @@ class AuthSeeder extends Seeder
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 0, // super_admin
+                        // 'role_description' => "Super Admin"
                     )
             ),
             array ( 
@@ -58,6 +60,7 @@ class AuthSeeder extends Seeder
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 1, // seller
+                        // 'role_description' => "Seller"
                     )
             ),
             array ( 
@@ -72,6 +75,7 @@ class AuthSeeder extends Seeder
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 2, // courier
+                        // 'role_description' => "Courier"
                     )
             ),
             array ( 
@@ -86,6 +90,7 @@ class AuthSeeder extends Seeder
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 3, // buyer
+                        // 'role_description' => "Buyer"
                     )
             ),
         );
@@ -110,9 +115,15 @@ class AuthSeeder extends Seeder
                 $user->username = $usersAuthMeds[$x][$y]['username'];
                 $user->password = $usersAuthMeds[$x][$y]['password'];
                 $user->last_online = $usersAuthMeds[$x][$y]['last_online'];
-                $user->role_type = $usersAuthMeds[$x][$y]['role_type'];
                 $user->auth_mediator_id = $authMediator->id;
                 $user->save();
+
+                $role = new Role;
+                $role->role_type = $usersAuthMeds[$x][$y]['role_type'];
+                // $role->description = $usersAuthMeds[$x][$y]['role_description'];
+                $role->status = true;
+                $role->auth_mediator_id = $authMediator->id;
+                $role->save();
 
             }
 

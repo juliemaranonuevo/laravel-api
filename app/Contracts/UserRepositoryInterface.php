@@ -12,4 +12,7 @@ interface UserRepositoryInterface {
     public function getUserData(CredentialData $user);
     
     public function signupstore(UserData $userData);
+
+    public function isExistsInAuth(string $uniqueInSignUp);
+
 }

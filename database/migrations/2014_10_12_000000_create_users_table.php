@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             // $table->rememberToken();
             $table->timestamp('last_online')->nullable();
             $table->boolean('status')->default(false);
-            $table->integer('role_type');
+            // $table->integer('role_type');
             $table->timestamps();
             // $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('auth_mediator_id');

@@ -40,8 +40,13 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function role()
+    // public function role()
+    // {
+    //     return $this->belongsTo(Role::class);
+    // }
+
+    public function authMediator()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(AuthMediator::class);
     }
 }

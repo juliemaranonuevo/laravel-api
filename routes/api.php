@@ -22,3 +22,5 @@ Route::post('/login', 'AuthController@authenticate');
 Route::post('/logout', 'AuthController@logout');
 
 Route::post('/users/create', 'AuthController@signupstore');
+Route::get('/users/create', 'AuthController@isExistsInAuth');
+
