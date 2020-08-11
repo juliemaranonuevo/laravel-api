@@ -4,6 +4,15 @@ namespace App\Dto;
 
 final class UserData {
 
+    /** @var string */
+    public $error_code;
+
+    /** @var string */
+    public $error_message;
+
+    /** @var boolean */
+    public $success;
+
     /** @var integer */
     public $id;
 

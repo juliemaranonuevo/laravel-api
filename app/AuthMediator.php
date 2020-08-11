@@ -34,4 +34,9 @@ class AuthMediator extends Model
     {
         return $this->hasMany(Account::class);
     }
+
+    public function role()
+    {
+        return $this->hasMany(Role::class);
+    }
 }

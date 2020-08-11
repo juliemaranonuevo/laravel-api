@@ -16,6 +16,7 @@ class CreateAuthMediatorsTable extends Migration
         Schema::create('tbl_auth_mediators', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('email')->unique();
+            $table->string('username')->unique();
             // $table->string('country_code');
             $table->string('phone_number')->nullable()->unique();
             $table->boolean('status')->default(false);

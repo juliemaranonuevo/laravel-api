@@ -10,13 +10,18 @@ class Role extends Model
 
     protected $guarded = [];
 
-    public function user()
-    {
-        return $this->hasMany(User::class);
-    }
+    // public function user()
+    // {
+    //     return $this->hasMany(User::class);
+    // }
 
-    public function userThirdParty()
+    // public function userThirdParty()
+    // {
+    //     return $this->hasMany(UserThirdParty::class);
+    // }
+
+    public function authMediator()
     {
-        return $this->hasMany(UserThirdParty::class);
+        return $this->belongsTo(AuthMediator::class);
     }
 }

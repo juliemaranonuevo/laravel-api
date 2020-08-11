@@ -16,8 +16,10 @@ class CreateRolesTable extends Migration
         Schema::create('tbl_roles', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('role_type');
-            $table->text('description');
+            // $table->text('description');
+            $table->boolean('status')->default(false);
             $table->timestamps();
+            $table->unsignedBigInteger('auth_mediator_id');
         });
     }
 
