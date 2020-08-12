@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\AuthService;
 use App\Dto\CredentialData;
 use App\Dto\UserData;
+use App\Dto\UserThirdPartyData;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
@@ -20,10 +21,29 @@ class AuthController extends Controller
     public function authenticate(Request $request): JsonResponse {
         $user = new CredentialData();
         // $user->email = $request->input('email');
+
         $user->email_username = $request->input('email_username');
         $user->password = $request->input('password');
         
         $message = $this->authService->authenticate($user);
+
+        return $message;
+    }
+
+    public function thirdPartyAuthenticate(Request $request): JsonResponse {
+
+        $userThirdPartyData = new UserThirdPartyData();
+        $userThirdPartyData->uId = $request->input('uId');
+        $userThirdPartyData->email = $request->input('email');
+        $userThirdPartyData->name = $request->input('name');
+        $userThirdPartyData->first_name = $request->input('first_name');
+        $userThirdPartyData->middle_name = $request->input('middle_name');
+        $userThirdPartyData->last_name = $request->input('last_name');
+        $userThirdPartyData->photo_url = $request->input('photo_url');
+        $userThirdPartyData->provider = $request->input('provider');
+        
+        // dd($userSocialData->uId);
+        $message = $this->authService->thirdPartyAuthenticate($userThirdPartyData);
 
         return $message;
     }

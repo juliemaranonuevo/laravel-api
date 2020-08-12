@@ -11,6 +11,14 @@ class TokenService {
     private $exp;
     private $accountId;
     private $email;
+    private $username;
+    private $first_name;
+    private $middle_name;
+    private $last_name;
+    private $extension_name;
+    private $photo_url;
+    private $provider;
+    private $phone_number;
     private $type;
     private $key;
 
@@ -31,6 +39,13 @@ class TokenService {
             "exp" => $this->exp,
             "accountId" => $userData->id,
             "email" => $userData->email,
+            "username" => $userData->username,
+            "first_name" => $userData->first_name,
+            "middle_name" => $userData->middle_name,
+            "last_name" => $userData->last_name,
+            "photo_url" => $userData->photo_url,
+            "provider" => 'Local',
+            "phone_number" => $userData->phone_number,
             "type" => $userData->role_type
         ];
 

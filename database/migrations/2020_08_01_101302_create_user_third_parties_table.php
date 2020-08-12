@@ -17,12 +17,9 @@ class CreateUserThirdPartiesTable extends Migration
             $table->bigIncrements('id');
             $table->string('uid')->unique();
             $table->string('email')->unique();
-            $table->string('display_name');
-            $table->timestamp('last_online')->nullable();
-            $table->boolean('status')->default(false);
-            // $table->integer('role_type');
+            $table->string('name');
+            $table->string('provider');
             $table->timestamps();
-            // $table->unsignedBigInteger('role_id');
             $table->unsignedBigInteger('auth_mediator_id');
         });
     }

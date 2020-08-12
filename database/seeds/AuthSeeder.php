@@ -35,13 +35,14 @@ class AuthSeeder extends Seeder
         $usersAuthMeds = array(
             array ( 
                 'email' => 'appVtrz.co@gmail.com',
+                'username' => 'appVtrz0717',
                 'phone_number' => '9126545289',
                 'status' => true,
                 'terms_policy' => true,
                 
                     array (
                         'email' => 'appVtrz.co@gmail.com',
-                        'username' => 'appVtrz',
+                        'username' => 'appVtrz0717',
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 0, // super_admin
@@ -50,13 +51,14 @@ class AuthSeeder extends Seeder
             ),
             array ( 
                 'email' => 'seller@gmail.com',
+                'username' => 'seller0717',
                 'phone_number' => '9126545288',
                 'status' => true,
                 'terms_policy' => true,
                 
                     array (
                         'email' => 'seller@gmail.com',
-                        'username' => 'seller',
+                        'username' => 'seller0717',
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 1, // seller
@@ -65,13 +67,14 @@ class AuthSeeder extends Seeder
             ),
             array ( 
                 'email' => 'runner@gmail.com',
+                'username' => 'runner0717',
                 'phone_number' => '9126545287',
                 'status' => true,
                 'terms_policy' => true,
                
                     array (
                         'email' => 'runner@gmail.com',
-                        'username' => 'runner',
+                        'username' => 'runner0717',
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 2, // courier
@@ -80,13 +83,14 @@ class AuthSeeder extends Seeder
             ),
             array ( 
                 'email' => 'buyer@gmail.com',
+                'username' => 'buyer0717',
                 'phone_number' => '9126545286',
                 'status' => true,
                 'terms_policy' => true,
         
                     array (
                         'email' => 'buyer@gmail.com',
-                        'username' => 'buyer',
+                        'username' => 'buyer0717',
                         'password' =>  bcrypt('000000'),
                         'last_online' => null,
                         'role_type' => 3, // buyer
@@ -103,6 +107,7 @@ class AuthSeeder extends Seeder
 
             $authMediator = new AuthMediator;
             $authMediator->email = $usersAuthMeds[$x]['email'];
+            $authMediator->username = $usersAuthMeds[$x]['username'];
             $authMediator->phone_number = $usersAuthMeds[$x]['phone_number'];
             $authMediator->status = $usersAuthMeds[$x]['status'];
             $authMediator->terms_policy = $usersAuthMeds[$x]['terms_policy'];

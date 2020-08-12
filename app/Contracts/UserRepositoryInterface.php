@@ -2,6 +2,7 @@
 namespace App\Contracts;
 use App\Dto\CredentialData;
 use App\Dto\UserData;
+use App\Dto\UserThirdPartyData;
 
 interface UserRepositoryInterface {
     
@@ -14,5 +15,12 @@ interface UserRepositoryInterface {
     public function signupstore(UserData $userData);
 
     public function isExistsInAuth(string $uniqueInSignUp);
+
+    public function isUniqueIdExists(string $isExistThirdPartyUid);
+
+    public function storeUserThirdPartyData(UserThirdPartyData $userThirdPartyData);
+
+    public function getUserThirdPartyData(UserThirdPartyData $userThirdPartyData);
+
 
 }

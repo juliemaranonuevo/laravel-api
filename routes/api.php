@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::post('/login', 'AuthController@authenticate');
+Route::post('/login/social', 'AuthController@thirdPartyAuthenticate');
 Route::post('/logout', 'AuthController@logout');
 
 Route::post('/users/create', 'AuthController@signupstore');
