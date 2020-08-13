@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Contracts\UserRepositoryInterface;
 use App\Dto\CredentialData;
 use App\Dto\UserData;
+use App\Dto\UserThirdPartyData;
 use App\Services\TokenService;
 use Illuminate\Http\JsonResponse;
 
@@ -36,25 +37,65 @@ class AuthService {
         }
     }
 
+    public function thirdPartyAuthenticate(UserThirdPartyData $userThirdPartyData): JsonResponse {
+       
+        $isUniqueIdExists = $this->repository->isUniqueIdExists($userThirdPartyData->uId);
+        
+        if ($isUniqueIdExists) {
+            
+            $userData = $this->repository->getUserThirdPartyData($userThirdPartyData);
+           
+        } else {
+
+            $userData = $this->repository->storeUserThirdPartyData($userThirdPartyData);
+            
+        }
+
+        if ($userData->success == true) { 
+       
+            $accessToken = $this->tokenService->createToken($userData);
+            // dd($accessToken);
+            // return response()->json(['userThirdPartyData' => $userThirdPartyData]);
+            return response()->json(['accessToken' => $accessToken]);
+
+        } else {
+
+            if ($userThirdPartyData->error_code == 409) { 
+
+                $message = $userThirdPartyData->error_message;
+                $code = 409 ;
+
+            } else {
+               
+                $message = "Something went wrong in the server. Please try again.";
+                $code = 500;
+               
+            }
+
+            return response()->json(['message' => $message], $code);
+        }
+    }
+
     public function signupstore(UserData $userData): JsonResponse {
 
         $isSuccessful = $this->repository->signupstore($userData);
-        // dd($isSuccessful);
+       
 
         if ($isSuccessful->success == true) { 
+            
             $accessToken = $this->tokenService->createToken($isSuccessful);
-
+            
             return response()->json(['accessToken' => $accessToken]);
 
         } else {
 
             if ($isSuccessful->error_code == 409) { 
-                // $message = "Duplicate Entry!";
-                $message = $isSuccessful->error_message;
+                $message = "Duplicate Entry!";
+                // $message = $isSuccessful->error_message;
                 $code = 409 ;
             } else {
                 $message = "Something went wrong in the server. Please try again.";
-                $code = 0;
+                $code = 500;
             }
 
             return response()->json(['message' => $message], $code);

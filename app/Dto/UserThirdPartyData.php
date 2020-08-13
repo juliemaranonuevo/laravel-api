@@ -2,8 +2,9 @@
 
 namespace App\Dto;
 
-final class UserData {
+final class UserThirdPartyData {
 
+   
     /** @var integer */
     public $id;
 
@@ -60,4 +61,5 @@ final class UserData {
  
      /** @var boolean */
      public $success;
+ 
 }
