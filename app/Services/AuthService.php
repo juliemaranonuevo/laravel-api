@@ -43,17 +43,20 @@ class AuthService {
         
         if ($isUniqueIdExists) {
             
-            $userThirdPartyData = $this->repository->getUserThirdPartyData($userThirdPartyData);
+            $userData = $this->repository->getUserThirdPartyData($userThirdPartyData);
            
         } else {
 
-            $userThirdPartyData = $this->repository->storeUserThirdPartyData($userThirdPartyData);
+            $userData = $this->repository->storeUserThirdPartyData($userThirdPartyData);
             
         }
 
-        if ($userThirdPartyData->success == true) { 
+        if ($userData->success == true) { 
        
-            return response()->json(['userThirdPartyData' => $userThirdPartyData]);
+            $accessToken = $this->tokenService->createToken($userData);
+            // dd($accessToken);
+            // return response()->json(['userThirdPartyData' => $userThirdPartyData]);
+            return response()->json(['accessToken' => $accessToken]);
 
         } else {
 
@@ -76,18 +79,19 @@ class AuthService {
     public function signupstore(UserData $userData): JsonResponse {
 
         $isSuccessful = $this->repository->signupstore($userData);
-        // dd($isSuccessful);
+       
 
         if ($isSuccessful->success == true) { 
+            
             $accessToken = $this->tokenService->createToken($isSuccessful);
-
+            
             return response()->json(['accessToken' => $accessToken]);
 
         } else {
 
             if ($isSuccessful->error_code == 409) { 
-                // $message = "Duplicate Entry!";
-                $message = $isSuccessful->error_message;
+                $message = "Duplicate Entry!";
+                // $message = $isSuccessful->error_message;
                 $code = 409 ;
             } else {
                 $message = "Something went wrong in the server. Please try again.";

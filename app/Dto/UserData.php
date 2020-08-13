@@ -4,23 +4,20 @@ namespace App\Dto;
 
 final class UserData {
 
-    /** @var string */
-    public $error_code;
-
-    /** @var string */
-    public $error_message;
-
-    /** @var boolean */
-    public $success;
-
     /** @var integer */
     public $id;
+
+    /** @var integer */
+    public $uId;
 
     /** @var string */
     public $username;
     
     /** @var string */
     public $email;
+
+    /** @var string */
+    public $name;
 
     /** @var string */
     public $first_name;
@@ -54,4 +51,13 @@ final class UserData {
 
     /** @var datetime */
     public $updated_at;
+
+     /** @var string */
+     public $error_code;
+
+     /** @var string */
+     public $error_message;
+ 
+     /** @var boolean */
+     public $success;
 }

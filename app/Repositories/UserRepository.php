@@ -70,8 +70,11 @@ class UserRepository implements UserRepositoryInterface {
         $userData = new UserData();
         $userData->success = true;
         $userData->id = $authMediator->id;
+        $userData->uId = null;
         $userData->email = $user->email;
-        $userData->username = $user->username;
+        $userData->username = $authMediator->username;
+        $userData->name = null;
+        $userData->provider = "Local";
 
         if (isset($account)) {
 
@@ -84,6 +87,7 @@ class UserRepository implements UserRepositoryInterface {
         }
         
         $userData->role_type = $role->role_type;
+        $userData->last_online = $authMediator->last_online;
         $userData->created_at = $user->created_at;
         $userData->updated_at = $user->updated_at;
 
@@ -131,9 +135,18 @@ class UserRepository implements UserRepositoryInterface {
             $userData = new UserData();
             $userData->success = true;
             $userData->id = $authMediator->id;
+            $userData->uId = null;
             $userData->email = $user->email;
             $userData->username = $authMediator->username;
+            $userData->name = null;
+            $userData->provider = "Local";
+            $userData->first_name = null;
+            $userData->middle_name = null;
+            $userData->last_name = null;
+            $userData->extension_name = null;
             $userData->role_type = $role->role_type;
+            $userData->photo_url = null;
+            $userData->last_online = null;
             $userData->created_at = $user->created_at;
             $userData->updated_at = $user->updated_at;
 
@@ -154,7 +167,7 @@ class UserRepository implements UserRepositoryInterface {
 
             } 
 
-            $userData->error_message = $e->getMessage();
+            // $userData->error_message = $e->getMessage();
 
             $response = $userData;
 
@@ -230,7 +243,7 @@ class UserRepository implements UserRepositoryInterface {
             $userThirdPartyData->extension_name = $account->extension_name;
             $userThirdPartyData->role_type = $role->role_type;
             $userThirdPartyData->photo_url = $account->photo;
-            $userThirdPartyData->last_online = $role->last_online;
+            $userThirdPartyData->last_online = $authMediator->last_online;
             $userThirdPartyData->created_at = $userThirdParty->created_at;
             $userThirdPartyData->updated_at = $userThirdParty->updated_at;
 
@@ -293,7 +306,7 @@ class UserRepository implements UserRepositoryInterface {
             $userThirdPartyData->extension_name = $account->extension_name;
             $userThirdPartyData->role_type = $role->role_type;
             $userThirdPartyData->photo_url = $account->photo;
-            $userThirdPartyData->last_online = $role->last_online;
+            $userThirdPartyData->last_online = $authMediator->last_online;
             $userThirdPartyData->created_at = $userThirdParty->created_at;
             $userThirdPartyData->updated_at = $userThirdParty->updated_at;
 
@@ -313,7 +326,7 @@ class UserRepository implements UserRepositoryInterface {
                 $userThirdPartyData->error_message = $e->errorInfo[2];
 
             } 
-            $userThirdPartyData->error_message = $e->getMessage();
+            // $userThirdPartyData->error_message = $e->getMessage();
 
             $response = $userThirdPartyData;
 

@@ -10,6 +10,7 @@ class TokenService {
     private $iat;
     private $exp;
     private $accountId;
+    private $uId;
     private $email;
     private $username;
     private $first_name;
@@ -38,13 +39,15 @@ class TokenService {
             "iat" => $this->iat,
             "exp" => $this->exp,
             "accountId" => $userData->id,
+            "uId" => $userData->uId,
             "email" => $userData->email,
             "username" => $userData->username,
             "first_name" => $userData->first_name,
             "middle_name" => $userData->middle_name,
             "last_name" => $userData->last_name,
+            "extension_name" => $userData->extension_name,
             "photo_url" => $userData->photo_url,
-            "provider" => 'Local',
+            "provider" => $userData->provider,
             "phone_number" => $userData->phone_number,
             "type" => $userData->role_type
         ];
