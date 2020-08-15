@@ -47,6 +47,9 @@ final class UserThirdPartyData {
     /** @var datetime */
     public $last_online;
 
+    /** @var boolean */
+    public $verified;
+
     /** @var datetime */
     public $created_at;
 

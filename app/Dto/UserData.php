@@ -11,13 +11,13 @@ final class UserData {
     public $uId;
 
     /** @var string */
-    public $username;
-    
-    /** @var string */
     public $email;
 
     /** @var string */
     public $name;
+
+    /** @var string */
+    public $username;
 
     /** @var string */
     public $first_name;
@@ -34,17 +34,20 @@ final class UserData {
     /** @var string */
     public $photo_url;
 
-    /** @var string */
-    public $provider;
-
     /** @var integer */
     public $role_type;
+
+    /** @var string */
+    public $provider;
 
     /** @var string */
     public $phone_number;
 
     /** @var datetime */
     public $last_online;
+
+    /** @var boolean */
+    public $verified;
 
     /** @var datetime */
     public $created_at;

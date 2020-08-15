@@ -3,8 +3,10 @@ declare(strict_types=1);
 namespace App\Services;
 use App\Contracts\UserRepositoryInterface;
 use App\Dto\CredentialData;
+use App\Dto\OneTimePasswordData;
 use App\Dto\UserData;
 use App\Dto\UserThirdPartyData;
+use App\Dto\RegistrationCompletionData;
 use App\Services\TokenService;
 use Illuminate\Http\JsonResponse;
 
@@ -37,17 +39,17 @@ class AuthService {
         }
     }
 
-    public function thirdPartyAuthenticate(UserThirdPartyData $userThirdPartyData): JsonResponse {
+    public function thirdPartyAuthenticate(UserData $userData): JsonResponse {
        
-        $isUniqueIdExists = $this->repository->isUniqueIdExists($userThirdPartyData->uId);
-        
+        $isUniqueIdExists = $this->repository->isUniqueIdExists($userData->uId);
+      
         if ($isUniqueIdExists) {
             
-            $userData = $this->repository->getUserThirdPartyData($userThirdPartyData);
+            $userData = $this->repository->getUserThirdPartyData($userData->email);
            
         } else {
 
-            $userData = $this->repository->storeUserThirdPartyData($userThirdPartyData);
+            $userData = $this->repository->storeUserThirdPartyData($userData);
             
         }
 
@@ -55,14 +57,13 @@ class AuthService {
        
             $accessToken = $this->tokenService->createToken($userData);
             // dd($accessToken);
-            // return response()->json(['userThirdPartyData' => $userThirdPartyData]);
             return response()->json(['accessToken' => $accessToken]);
 
         } else {
 
-            if ($userThirdPartyData->error_code == 409) { 
+            if ($userData->error_code == 409) { 
 
-                $message = $userThirdPartyData->error_message;
+                $message = $userData->error_message;
                 $code = 409 ;
 
             } else {
@@ -80,7 +81,6 @@ class AuthService {
 
         $isSuccessful = $this->repository->signupstore($userData);
        
-
         if ($isSuccessful->success == true) { 
             
             $accessToken = $this->tokenService->createToken($isSuccessful);
@@ -90,6 +90,39 @@ class AuthService {
         } else {
 
             if ($isSuccessful->error_code == 409) { 
+
+                $message = "Duplicate Entry!";
+                $code = 409 ;
+
+            } else {
+
+                $message = "Something went wrong in the server. Please try again.";
+                $code = 500;
+                
+            }
+
+            return response()->json(['message' => $message], $code);
+
+        }
+        
+    }
+
+    public function registrationCompletion(RegistrationCompletionData $registrationCompletionData): JsonResponse {
+
+
+        $oneTimePassword = $this->repository->registrationCompletion($registrationCompletionData);
+       
+        if ($oneTimePassword->success == true) { 
+            
+            $userData = $this->repository->getUserThirdPartyData($oneTimePassword->email);
+
+            $accessToken = $this->tokenService->createToken($userData);
+
+            return response()->json(['accessToken' => $accessToken, 'phone_number' => $oneTimePassword->phone_number]);
+
+        } else {
+
+            if ($oneTimePassword->error_code == 409) { 
                 $message = "Duplicate Entry!";
                 // $message = $isSuccessful->error_message;
                 $code = 409 ;
@@ -102,6 +135,36 @@ class AuthService {
 
         }
         
+    }
+
+    public function oneTimePasswordVerification(OneTimePasswordData $oneTimePasswordData): JsonResponse {
+
+        $oneTimePasswordVerification = $this->repository->oneTimePasswordVerification($oneTimePasswordData);
+        
+        if ($oneTimePasswordVerification) { 
+
+            $userData = $this->repository->getUserThirdPartyData($oneTimePasswordVerification->email);
+            
+            $accessToken = $this->tokenService->createToken($userData);
+
+            // dd($accessToken);
+            return response()->json($oneTimePasswordVerification);
+
+        } else {
+
+            if ($oneTimePasswordVerification->error_code == 409) { 
+                $message = "Duplicate Entry!";
+                // $message = $isSuccessful->error_message;
+                $code = 409 ;
+            } else {
+                $message = "Something went wrong in the server. Please try again.";
+                $code = 500;
+            }
+
+            return response()->json(['message' => $message], $code);
+
+        }
+
     }
 
     public function isExistsInAuth(string $uniqueInSignUp): JsonResponse {

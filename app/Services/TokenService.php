@@ -20,6 +20,7 @@ class TokenService {
     private $photo_url;
     private $provider;
     private $phone_number;
+    private $verified;
     private $type;
     private $key;
 
@@ -49,7 +50,8 @@ class TokenService {
             "photo_url" => $userData->photo_url,
             "provider" => $userData->provider,
             "phone_number" => $userData->phone_number,
-            "type" => $userData->role_type
+            "type" => $userData->role_type,
+            "verified" => $userData->verified
         ];
 
         return JWT::encode($payload, $this->key);
