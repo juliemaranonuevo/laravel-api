@@ -81,7 +81,7 @@ class UserRepository implements UserRepositoryInterface {
         $userData = new UserData();
         $userData->success = true;
         $userData->id = $authMediator->id;
-        $userData->uId = null;
+        $userData->user_id = null;
         $userData->email = $user->email;
         $userData->username = $authMediator->username;
         $userData->name = null;
@@ -108,9 +108,9 @@ class UserRepository implements UserRepositoryInterface {
 
     }
 
-    public function logout(string $accountId) {
+    public function logout(string $authId) {
 
-        $authMediator = AuthMediator::find($accountId);
+        $authMediator = AuthMediator::find($authId);
         $authMediator->is_online = false;
         $authMediator->last_online = now();
         $authMediator->save();
@@ -156,7 +156,7 @@ class UserRepository implements UserRepositoryInterface {
             $userData = new UserData();
             $userData->success = true;
             $userData->id = $authMediator->id;
-            $userData->uId = null;
+            $userData->user_id = null;
             $userData->email = $user->email;
             $userData->username = $authMediator->username;
             $userData->name = null;
@@ -210,8 +210,8 @@ class UserRepository implements UserRepositoryInterface {
         return $uniqueInSignUp->isNotEmpty();
     }
 
-    public function isUniqueIdExists(string $isExistThirdPartyUid) {
-        $isUniqueIdExists = UserThirdParty::where('uid', $isExistThirdPartyUid)
+    public function isUniqueIdExists(string $isExistThirdPartyuser_id) {
+        $isUniqueIdExists = UserThirdParty::where('user_id', $isExistThirdPartyuser_id)
         ->get();
 
         return $isUniqueIdExists->isNotEmpty();
@@ -238,7 +238,7 @@ class UserRepository implements UserRepositoryInterface {
             $role->save();
 
             $userThirdParty = new UserThirdParty();
-            $userThirdParty->uid = $userData->uId;
+            $userThirdParty->user_id = $userData->user_id;
             $userThirdParty->email = $userData->email;
             $userThirdParty->name = $userData->name;
             $userThirdParty->provider = $userData->provider;
@@ -257,7 +257,7 @@ class UserRepository implements UserRepositoryInterface {
             $userData = new UserData();
             $userData->success = true;
             $userData->id = $authMediator->id;
-            $userData->uId = $userThirdParty->uid;
+            $userData->user_id = $userThirdParty->user_id;
             $userData->email = $userThirdParty->email;
             $userData->name = $userThirdParty->name;
             $userData->provider = $userThirdParty->provider;
@@ -322,7 +322,7 @@ class UserRepository implements UserRepositoryInterface {
             $userData = new UserData();
             $userData->success = true;
             $userData->id = $authMediator->id;
-            $userData->uId = $userThirdParty->uid;
+            $userData->user_id = $userThirdParty->user_id;
             $userData->email = $userThirdParty->email;
             $userData->name = $userThirdParty->name;
             $userData->provider = $userThirdParty->provider;
@@ -422,6 +422,16 @@ class UserRepository implements UserRepositoryInterface {
         
         return $response;
  
+    }
+
+    public function oneTimePasswordExist(OneTimePasswordData $oneTimePasswordData) {
+       
+        $oneTimePassword = $this->oneTimePassword->where('auth_mediator_id', $oneTimePasswordData->id)
+        ->where('otp', $oneTimePasswordData->one_time_password)
+        ->get();
+
+        return $oneTimePassword->isNotEmpty();
+
     }
 
     public function oneTimePasswordVerification(OneTimePasswordData $oneTimePasswordData) : OneTimePasswordData { 

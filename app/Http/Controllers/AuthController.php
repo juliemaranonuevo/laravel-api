@@ -35,7 +35,7 @@ class AuthController extends Controller
     public function thirdPartyAuthenticate(Request $request): JsonResponse {
 
         $userData = new UserData();
-        $userData->uId = $request->input('uId');
+        $userData->user_id = $request->input('user_id');
         $userData->email = $request->input('email');
         $userData->name = $request->input('name');
         $userData->first_name = $request->input('first_name');
@@ -95,8 +95,8 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request): JsonResponse {
-        $accountId = $request->input('accountId');
-        $isLogout = $this->authService->logout($accountId);
+        $authId = $request->input('auth_id');
+        $isLogout = $this->authService->logout($authId);
         return response()->json($isLogout);
     }
 }

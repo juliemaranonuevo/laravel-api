@@ -8,7 +8,7 @@ final class UserData {
     public $id;
 
     /** @var integer */
-    public $uId;
+    public $user_id;
 
     /** @var string */
     public $email;

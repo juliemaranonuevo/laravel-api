@@ -15,7 +15,7 @@ interface UserRepositoryInterface {
     public function storeUserThirdPartyData(UserData $userData);
 
     public function getUserThirdPartyData(string $userData);
-    
+
     
     public function signupstore(UserData $userData);
     
@@ -26,9 +26,11 @@ interface UserRepositoryInterface {
     
     public function registrationCompletion(RegistrationCompletionData $registrationCompletionData);
     
+    public function oneTimePasswordExist(OneTimePasswordData $oneTimePasswordData);
+
     public function oneTimePasswordVerification(OneTimePasswordData $oneTimePasswordData);
     
-    public function logout(string $user);
+    public function logout(string $authId);
 
 
 }

@@ -9,8 +9,8 @@ class TokenService {
     private $aud;
     private $iat;
     private $exp;
-    private $accountId;
-    private $uId;
+    private $auth_id;
+    private $user_id;
     private $email;
     private $username;
     private $first_name;
@@ -39,8 +39,8 @@ class TokenService {
             "aud" => $this->aud,
             "iat" => $this->iat,
             "exp" => $this->exp,
-            "accountId" => $userData->id,
-            "uId" => $userData->uId,
+            "auth_id" => $userData->id,
+            "user_id" => $userData->user_id,
             "email" => $userData->email,
             "username" => $userData->username,
             "first_name" => $userData->first_name,

@@ -41,7 +41,7 @@ class AuthService {
 
     public function thirdPartyAuthenticate(UserData $userData): JsonResponse {
        
-        $isUniqueIdExists = $this->repository->isUniqueIdExists($userData->uId);
+        $isUniqueIdExists = $this->repository->isUniqueIdExists($userData->user_id);
       
         if ($isUniqueIdExists) {
             
@@ -139,31 +139,39 @@ class AuthService {
 
     public function oneTimePasswordVerification(OneTimePasswordData $oneTimePasswordData): JsonResponse {
 
-        $oneTimePasswordVerification = $this->repository->oneTimePasswordVerification($oneTimePasswordData);
-        
-        if ($oneTimePasswordVerification) { 
+        $ifotpExist = $this->repository->oneTimePasswordExist($oneTimePasswordData);
 
-            $userData = $this->repository->getUserThirdPartyData($oneTimePasswordVerification->email);
-            
-            $accessToken = $this->tokenService->createToken($userData);
+        if ($ifotpExist) {
 
-            // dd($accessToken);
-            return response()->json($oneTimePasswordVerification);
+            $oneTimePasswordVerification = $this->repository->oneTimePasswordVerification($oneTimePasswordData);
+            if ($oneTimePasswordVerification) { 
+
+                $userData = $this->repository->getUserThirdPartyData($oneTimePasswordVerification->email);
+                
+                $accessToken = $this->tokenService->createToken($userData);
+               
+                return response()->json(['accessToken' => $accessToken]);
+    
+            } else {
+
+                if ($oneTimePasswordVerification->error_code == 409) { 
+                    $message = "Duplicate Entry!";
+                    $code = 409 ;
+                } else {
+                    $message = "Something went wrong in the server. Please try again.";
+                    $code = 500;
+                }
+
+            }
 
         } else {
 
-            if ($oneTimePasswordVerification->error_code == 409) { 
-                $message = "Duplicate Entry!";
-                // $message = $isSuccessful->error_message;
-                $code = 409 ;
-            } else {
-                $message = "Something went wrong in the server. Please try again.";
-                $code = 500;
-            }
-
-            return response()->json(['message' => $message], $code);
+            $message = "You have entered an invalid one time password. Please click resend to get your new otp code.";
+            $code = 401;
 
         }
+
+        return response()->json(['message' => $message], $code);
 
     }
 
@@ -175,9 +183,9 @@ class AuthService {
 
     }
 
-    public function logout(string $accountId): JsonResponse {
+    public function logout(string $authId): JsonResponse {
 
-        $isUserExists = $this->repository->logout($accountId);
+        $isUserExists = $this->repository->logout($authId);
 
         return response()->json($isUserExists);
         

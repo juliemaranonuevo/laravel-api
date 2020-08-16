@@ -9,7 +9,7 @@ final class UserThirdPartyData {
     public $id;
 
     /** @var integer */
-    public $uId;
+    public $user_id;
 
     /** @var string */
     public $username;
