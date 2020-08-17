@@ -1,0 +1,40 @@
+    $output = array(
+        "message_id" => 12345,
+        "user_id"=> 54321,
+        "user"=> "timmy@toolbox.com",
+        "account_id"=> 987654,
+        "account"=> "My Account",
+        "recipient"=> "639998887777",
+        "message"=> "Your OTP code is now 332200. Please use it quickly!",
+        "code"=> 332200,
+        "sender_name"=> "MySenderName",
+        "network"=> "Globe",
+        "status"=> "Pending",
+        "type"=> "Single",
+        "source"=> "Api",
+        "created_at"=> "2020-01-01 01:01:01",
+        "updated_at"=> "2020-01-01 01:01:01",
+    );
+        
+    $data = response()->json($output);
+
+    dd($data->getData()->code);
+
+    $ch = curl_init();
+    $parameters = array(
+        'apikey' => '80e5e9f29d466d8a95186964c7c41907', //Your API KEY
+        'number' => $registrationCompletionData->phone_number,
+        'message' => 'Your One Time Password is: .',
+        'sendername' => 'SEMAPHORE'
+    );
+    curl_setopt( $ch, CURLOPT_URL,'https://semaphore.co/api/v4/messages' );
+    curl_setopt( $ch, CURLOPT_POST, 1 );
+
+    //Send the parameters set above with the request
+    curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $parameters ) );
+
+    // Receive response from server
+    curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+    $output = curl_exec( $ch );
+    curl_close ($ch);
+    echo $output;

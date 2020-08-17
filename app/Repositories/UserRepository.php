@@ -16,6 +16,7 @@ use App\Dto\RegistrationCompletionData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Hash;
 
 class UserRepository implements UserRepositoryInterface {
@@ -365,6 +366,23 @@ class UserRepository implements UserRepositoryInterface {
     }
 
     public function registrationCompletion(RegistrationCompletionData $registrationCompletionData) : RegistrationCompletionData { 
+
+        //for development use only. For Production Sophamore SMS will be used. 
+        //Please check the app/Repositories/sophamore-sms
+        function itexmo($number, $message, $apicode, $password) {
+            $url = 'https://www.itexmo.com/php_api/api.php';
+            $itexmo = array('1' => $number, '2' => $message, '3' => $apicode, 'passwd' => $password);
+            $param = array(
+                'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($itexmo),
+                ),
+            );
+            $context  = stream_context_create($param);
+            return file_get_contents($url, false, $context);
+        }
+
         $random_number = intval( "0" . rand(1,9) . rand(1,9) . rand(0,9) . rand(0,9) . rand(0,9) . rand(0,9) );
 
         DB::beginTransaction();
@@ -383,15 +401,28 @@ class UserRepository implements UserRepositoryInterface {
                 $oneTimePassword->status = false;
                 $oneTimePassword->auth_mediator_id = $authmediator->id;
                 $oneTimePassword->save();
+                $sendSms = true;
 
             } else {
             
                 $oneTimePassword->otp =  $random_number;
                 $oneTimePassword->status = false;
                 $oneTimePassword->save();
+                $sendSms = true;
 
             }
-        
+
+            if ($sendSms) {
+                //for development use only.
+                $number = $authmediator->phone_number;
+                $message = "Your One Time Password is: $random_number. - Buycycle";
+                $apicode = "TR-MARJO195378_IA12B";
+                $password = "l6)qlh3}&&";
+
+                itexmo($number,$message, $apicode, $password);
+
+            }
+            
             $registrationCompletionData = new RegistrationCompletionData();
             $registrationCompletionData->success = true;
             $registrationCompletionData->otp = $oneTimePassword->otp;
