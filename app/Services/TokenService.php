@@ -9,8 +9,8 @@ class TokenService {
     private $aud;
     private $iat;
     private $exp;
-    private $accountId;
-    private $uId;
+    private $auth_id;
+    private $user_id;
     private $email;
     private $username;
     private $first_name;
@@ -20,6 +20,7 @@ class TokenService {
     private $photo_url;
     private $provider;
     private $phone_number;
+    private $verified;
     private $type;
     private $key;
 
@@ -38,8 +39,8 @@ class TokenService {
             "aud" => $this->aud,
             "iat" => $this->iat,
             "exp" => $this->exp,
-            "accountId" => $userData->id,
-            "uId" => $userData->uId,
+            "auth_id" => $userData->id,
+            "user_id" => $userData->user_id,
             "email" => $userData->email,
             "username" => $userData->username,
             "first_name" => $userData->first_name,
@@ -49,7 +50,8 @@ class TokenService {
             "photo_url" => $userData->photo_url,
             "provider" => $userData->provider,
             "phone_number" => $userData->phone_number,
-            "type" => $userData->role_type
+            "type" => $userData->role_type,
+            "verified" => $userData->verified
         ];
 
         return JWT::encode($payload, $this->key);

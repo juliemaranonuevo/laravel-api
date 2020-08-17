@@ -15,7 +15,7 @@ class CreateUserThirdPartiesTable extends Migration
     {
         Schema::create('tbl_user_third_parties', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('uid')->unique();
+            $table->string('user_id')->unique();
             $table->string('email')->unique();
             $table->string('name');
             $table->string('provider');

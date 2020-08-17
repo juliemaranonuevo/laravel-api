@@ -3,16 +3,20 @@ declare(strict_types=1);
 namespace App\Repositories;
 use App\Account;
 use App\AuthMediator;
+use App\OneTimePassword;
 use App\User;
 use App\Role;
 use App\UserThirdParty;
 use App\Contracts\UserRepositoryInterface;
 use App\Dto\CredentialData;
+use App\Dto\OneTimePasswordData;
 use App\Dto\UserData;
 use App\Dto\UserThirdPartyData;
+use App\Dto\RegistrationCompletionData;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Hash;
 
 class UserRepository implements UserRepositoryInterface {
@@ -21,12 +25,20 @@ class UserRepository implements UserRepositoryInterface {
     private $role;
     private $userThirdParty;
     private $account;
+    private $oneTimePassword;
 
-    public function __construct(User $user, UserThirdParty $userThirdParty, Account $account, Role $role) {
+    public function __construct(
+        User $user, 
+        UserThirdParty $userThirdParty, 
+        Account $account, 
+        Role $role,
+        OneTimePassword $oneTimePassword
+    ) {
         $this->user = $user;
         $this->userThirdParty = $userThirdParty;
         $this->account = $account;
         $this->role = $role;
+        $this->oneTimePassword = $oneTimePassword;
     }
 
     public function isUserExists(CredentialData $user) : bool {
@@ -70,7 +82,7 @@ class UserRepository implements UserRepositoryInterface {
         $userData = new UserData();
         $userData->success = true;
         $userData->id = $authMediator->id;
-        $userData->uId = null;
+        $userData->user_id = null;
         $userData->email = $user->email;
         $userData->username = $authMediator->username;
         $userData->name = null;
@@ -86,18 +98,20 @@ class UserRepository implements UserRepositoryInterface {
 
         }
         
+        $userData->phone_number = $authMediator->phone_number;
         $userData->role_type = $role->role_type;
         $userData->last_online = $authMediator->last_online;
         $userData->created_at = $user->created_at;
         $userData->updated_at = $user->updated_at;
+        $userData->verified = $authMediator->otp_status;
 
         return $userData;
 
     }
 
-    public function logout(string $accountId) {
+    public function logout(string $authId) {
 
-        $authMediator = AuthMediator::find($accountId);
+        $authMediator = AuthMediator::find($authId);
         $authMediator->is_online = false;
         $authMediator->last_online = now();
         $authMediator->save();
@@ -132,10 +146,18 @@ class UserRepository implements UserRepositoryInterface {
             $user->auth_mediator_id = $authMediator->id;
             $user->save();
 
+            $random_number = intval( "0" . rand(1,9) . rand(1,9) . rand(0,9) . rand(0,9) . rand(0,9) . rand(0,9) );
+            
+            $oneTimePassword = new OneTimePassword();
+            $oneTimePassword->otp = $random_number;
+            $oneTimePassword->status = false;
+            $oneTimePassword->auth_mediator_id = $authMediator->id;
+            $oneTimePassword->save();
+
             $userData = new UserData();
             $userData->success = true;
             $userData->id = $authMediator->id;
-            $userData->uId = null;
+            $userData->user_id = null;
             $userData->email = $user->email;
             $userData->username = $authMediator->username;
             $userData->name = null;
@@ -144,11 +166,13 @@ class UserRepository implements UserRepositoryInterface {
             $userData->middle_name = null;
             $userData->last_name = null;
             $userData->extension_name = null;
+            $userData->phone_number = $authMediator->phone_number;
             $userData->role_type = $role->role_type;
             $userData->photo_url = null;
             $userData->last_online = null;
             $userData->created_at = $user->created_at;
             $userData->updated_at = $user->updated_at;
+            $userData->verified = $authMediator->otp_status;
 
             DB::commit();
 
@@ -177,6 +201,7 @@ class UserRepository implements UserRepositoryInterface {
 
     }
 
+
     public function isExistsInAuth(string $uniqueInSignUp) {
         $uniqueInSignUp = AuthMediator::where('email', $uniqueInSignUp)
         ->orwhere('username', $uniqueInSignUp)
@@ -186,21 +211,21 @@ class UserRepository implements UserRepositoryInterface {
         return $uniqueInSignUp->isNotEmpty();
     }
 
-    public function isUniqueIdExists(string $isExistThirdPartyUid) {
-        $isUniqueIdExists = UserThirdParty::where('uid', $isExistThirdPartyUid)
+    public function isUniqueIdExists(string $isExistThirdPartyuser_id) {
+        $isUniqueIdExists = UserThirdParty::where('user_id', $isExistThirdPartyuser_id)
         ->get();
 
         return $isUniqueIdExists->isNotEmpty();
     }
 
-    public function storeUserThirdPartyData(UserThirdPartyData $userThirdPartyData) : UserThirdPartyData {
+    public function storeUserThirdPartyData(UserData $userData) : UserData {
 
         DB::beginTransaction();
 
         try { 
 
             $authMediator = new AuthMediator();
-            $authMediator->email = $userThirdPartyData->email;
+            $authMediator->email = $userData->email;
             $authMediator->username = null;
             $authMediator->phone_number = null;
             $authMediator->is_online = true;
@@ -214,57 +239,59 @@ class UserRepository implements UserRepositoryInterface {
             $role->save();
 
             $userThirdParty = new UserThirdParty();
-            $userThirdParty->uid = $userThirdPartyData->uId;
-            $userThirdParty->email = $userThirdPartyData->email;
-            $userThirdParty->name = $userThirdPartyData->name;
-            $userThirdParty->provider = $userThirdPartyData->provider;
+            $userThirdParty->user_id = $userData->user_id;
+            $userThirdParty->email = $userData->email;
+            $userThirdParty->name = $userData->name;
+            $userThirdParty->provider = $userData->provider;
             $userThirdParty->auth_mediator_id = $authMediator->id;
             $userThirdParty->save();
 
             $account = new Account();
-            $account->first_name = $userThirdPartyData->first_name;
-            $account->middle_name = $userThirdPartyData->middle_name;
-            $account->last_name = $userThirdPartyData->last_name;
-            $account->photo = $userThirdPartyData->photo_url;
+            $account->first_name = $userData->first_name;
+            $account->middle_name = $userData->middle_name;
+            $account->last_name = $userData->last_name;
+            $account->photo = $userData->photo_url;
             $account->status = true;
             $account->auth_mediator_id = $authMediator->id;
             $account->save();
-
-            $userThirdPartyData = new UserThirdPartyData();
-            $userThirdPartyData->success = true;
-            $userThirdPartyData->id = $authMediator->id;
-            $userThirdPartyData->uId = $userThirdParty->uid;
-            $userThirdPartyData->email = $userThirdParty->email;
-            $userThirdPartyData->name = $userThirdParty->name;
-            $userThirdPartyData->provider = $userThirdParty->provider;
-            $userThirdPartyData->first_name = $account->first_name;
-            $userThirdPartyData->middle_name = $account->middle_name;
-            $userThirdPartyData->last_name = $account->last_name;
-            $userThirdPartyData->extension_name = $account->extension_name;
-            $userThirdPartyData->role_type = $role->role_type;
-            $userThirdPartyData->photo_url = $account->photo;
-            $userThirdPartyData->last_online = $authMediator->last_online;
-            $userThirdPartyData->created_at = $userThirdParty->created_at;
-            $userThirdPartyData->updated_at = $userThirdParty->updated_at;
+            
+            $userData = new UserData();
+            $userData->success = true;
+            $userData->id = $authMediator->id;
+            $userData->user_id = $userThirdParty->user_id;
+            $userData->email = $userThirdParty->email;
+            $userData->name = $userThirdParty->name;
+            $userData->provider = $userThirdParty->provider;
+            $userData->first_name = $account->first_name;
+            $userData->middle_name = $account->middle_name;
+            $userData->last_name = $account->last_name;
+            $userData->extension_name = $account->extension_name;
+            $userData->phone_number = $authMediator->phone_number;
+            $userData->role_type = $role->role_type;
+            $userData->photo_url = $account->photo;
+            $userData->last_online = $authMediator->last_online;
+            $userData->created_at = $userThirdParty->created_at;
+            $userData->updated_at = $userThirdParty->updated_at;
+            $userData->verified = $authMediator->otp_status;
 
             DB::commit();
 
-            $response = $userThirdPartyData;
+            $response = $userData;
 
         } catch ( \Exception $e ) {
                 
             DB::rollBack();
-            $userThirdPartyData = new UserThirdPartyData();
-            $userThirdPartyData->success = false;
+            $userData = new UserData();
+            $userData->success = false;
 
             if ( $e->getCode() == 23000 ) {
                 
-                $userThirdPartyData->error_code =  409;
-                $userThirdPartyData->error_message = $e->errorInfo[2];
+                $userData->error_code =  409;
+                $userData->error_message = $e->errorInfo[2];
 
             } 
 
-            $response = $userThirdPartyData;
+            $response = $userData;
 
         }
     
@@ -272,13 +299,13 @@ class UserRepository implements UserRepositoryInterface {
 
     }
 
-    public function getUserThirdPartyData(UserThirdPartyData $userThirdPartyData) : UserThirdPartyData {
-
+    public function getUserThirdPartyData(string $userData) : UserData {
+        
         DB::beginTransaction();
 
         try { 
 
-            $userThirdParty = $this->userThirdParty->where('email', $userThirdPartyData->email)
+            $userThirdParty = $this->userThirdParty->where('email', $userData)
             ->first();
 
             $authMediator = AuthMediator::find($userThirdParty->auth_mediator_id);
@@ -292,47 +319,193 @@ class UserRepository implements UserRepositoryInterface {
             $account = $this->account->where('auth_mediator_id', $userThirdParty->auth_mediator_id)
             ->where('status', true)
             ->first();
-
-            $userThirdPartyData = new UserThirdPartyData();
-            $userThirdPartyData->success = true;
-            $userThirdPartyData->id = $authMediator->id;
-            $userThirdPartyData->uId = $userThirdParty->uid;
-            $userThirdPartyData->email = $userThirdParty->email;
-            $userThirdPartyData->name = $userThirdParty->name;
-            $userThirdPartyData->provider = $userThirdParty->provider;
-            $userThirdPartyData->first_name = $account->first_name;
-            $userThirdPartyData->middle_name = $account->middle_name;
-            $userThirdPartyData->last_name = $account->last_name;
-            $userThirdPartyData->extension_name = $account->extension_name;
-            $userThirdPartyData->role_type = $role->role_type;
-            $userThirdPartyData->photo_url = $account->photo;
-            $userThirdPartyData->last_online = $authMediator->last_online;
-            $userThirdPartyData->created_at = $userThirdParty->created_at;
-            $userThirdPartyData->updated_at = $userThirdParty->updated_at;
+            
+            $userData = new UserData();
+            $userData->success = true;
+            $userData->id = $authMediator->id;
+            $userData->user_id = $userThirdParty->user_id;
+            $userData->email = $userThirdParty->email;
+            $userData->name = $userThirdParty->name;
+            $userData->provider = $userThirdParty->provider;
+            $userData->first_name = $account->first_name;
+            $userData->middle_name = $account->middle_name;
+            $userData->last_name = $account->last_name;
+            $userData->extension_name = $account->extension_name;
+            $userData->phone_number = $authMediator->phone_number;
+            $userData->role_type = $role->role_type;
+            $userData->photo_url = $account->photo;
+            $userData->last_online = $authMediator->last_online;
+            $userData->created_at = $userThirdParty->created_at;
+            $userData->updated_at = $userThirdParty->updated_at;
+            $userData->verified = $authMediator->otp_status;
 
             DB::commit();
 
-            $response = $userThirdPartyData;
+            $response = $userData;
 
         } catch ( \Exception $e ) {
                 
             DB::rollBack();
-            $userThirdPartyData = new UserThirdPartyData();
-            $userThirdPartyData->success = false;
+            $userData = new UserData();
+            $userData->success = false;
 
             if ( $e->getCode() == 23000 ) {
                 
-                $userThirdPartyData->error_code =  409;
-                $userThirdPartyData->error_message = $e->errorInfo[2];
+                $userData->error_code =  409;
+                $userData->error_message = $e->errorInfo[2];
 
             } 
-            // $userThirdPartyData->error_message = $e->getMessage();
+            $userData->error_message = $e->getMessage();
 
-            $response = $userThirdPartyData;
+            $response = $userData;
+
+        }
+    
+        return $response;
+
+    }
+
+    public function registrationCompletion(RegistrationCompletionData $registrationCompletionData) : RegistrationCompletionData { 
+
+        //for development use only. For Production Sophamore SMS will be used. 
+        //Please check the app/Repositories/sophamore-sms
+        function itexmo($number, $message, $apicode, $password) {
+            $url = 'https://www.itexmo.com/php_api/api.php';
+            $itexmo = array('1' => $number, '2' => $message, '3' => $apicode, 'passwd' => $password);
+            $param = array(
+                'http' => array(
+                    'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method'  => 'POST',
+                    'content' => http_build_query($itexmo),
+                ),
+            );
+            $context  = stream_context_create($param);
+            return file_get_contents($url, false, $context);
+        }
+
+        $random_number = intval( "0" . rand(1,9) . rand(1,9) . rand(0,9) . rand(0,9) . rand(0,9) . rand(0,9) );
+
+        DB::beginTransaction();
+
+        try { 
+
+            $authmediator = AuthMediator::find($registrationCompletionData->id);
+            $authmediator->phone_number = $registrationCompletionData->phone_number;
+            $authmediator->save();
+
+            $oneTimePassword = $this->oneTimePassword->where('auth_mediator_id', $authmediator->id)->first();
+            if (!isset($oneTimePassword)) {
+
+                $oneTimePassword = new OneTimePassword();
+                $oneTimePassword->otp = $random_number;
+                $oneTimePassword->status = false;
+                $oneTimePassword->auth_mediator_id = $authmediator->id;
+                $oneTimePassword->save();
+                $sendSms = true;
+
+            } else {
+            
+                $oneTimePassword->otp =  $random_number;
+                $oneTimePassword->status = false;
+                $oneTimePassword->save();
+                $sendSms = true;
+
+            }
+
+            if ($sendSms) {
+                //for development use only.
+                $number = $authmediator->phone_number;
+                $message = "Your One Time Password is: $random_number. - Buycycle";
+                $apicode = "TR-MARJO195378_IA12B";
+                $password = "l6)qlh3}&&";
+
+                itexmo($number,$message, $apicode, $password);
+
+            }
+            
+            $registrationCompletionData = new RegistrationCompletionData();
+            $registrationCompletionData->success = true;
+            $registrationCompletionData->otp = $oneTimePassword->otp;
+            $registrationCompletionData->email = $authmediator->email;
+            $registrationCompletionData->phone_number = $authmediator->phone_number;
+
+            DB::commit();
+
+            $response = $registrationCompletionData;
+
+        } catch ( \Exception $e ) {
+                
+            DB::rollBack();
+            $registrationCompletionData = new RegistrationCompletionData();
+            $registrationCompletionData->success = false;
+
+            if ( $e->getCode() == 23000 ) {
+                
+                $registrationCompletionData->error_code =  409;
+                $registrationCompletionData->error_message = $e->errorInfo[2];
+
+            } 
+            $registrationCompletionData->error_message = $e->getMessage();
+
+            $response = $registrationCompletionData;
+
+        }
+        
+        return $response;
+ 
+    }
+
+    public function oneTimePasswordExist(OneTimePasswordData $oneTimePasswordData) {
+       
+        $oneTimePassword = $this->oneTimePassword->where('auth_mediator_id', $oneTimePasswordData->id)
+        ->where('otp', $oneTimePasswordData->one_time_password)
+        ->get();
+
+        return $oneTimePassword->isNotEmpty();
+
+    }
+
+    public function oneTimePasswordVerification(OneTimePasswordData $oneTimePasswordData) : OneTimePasswordData { 
+
+        DB::beginTransaction();
+
+        try { 
+
+            $authmediator = AuthMediator::find($oneTimePasswordData->id);
+            $authmediator->otp_status = true;
+            $authmediator->save();
+
+            $oneTimePassword = $this->oneTimePassword->where('auth_mediator_id', $authmediator->id)->first();
+            $oneTimePassword->status = true;
+            $oneTimePassword->save();
+
+            $oneTimePasswordData = new OneTimePasswordData();
+            $oneTimePasswordData->id = $authmediator->id;
+            $oneTimePasswordData->email = $authmediator->email;
+            $oneTimePasswordData->success = true;
+
+            DB::commit();
+
+            $response = $oneTimePasswordData;
+
+        } catch ( \Exception $e ) {
+
+            DB::rollBack();
+            $oneTimePasswordData = new OneTimePasswordData();
+            $oneTimePasswordData->success = false;
+
+            if ( $e->getCode() == 23000 ) {
+                
+                $oneTimePasswordData->error_code =  409;
+                $oneTimePasswordData->error_message = $e->errorInfo[2];
+
+            } 
+            $oneTimePasswordData->error_message = $e->getMessage();
+
+            $response = $oneTimePasswordData;
 
         }
       
         return $response;
-
     }
 }

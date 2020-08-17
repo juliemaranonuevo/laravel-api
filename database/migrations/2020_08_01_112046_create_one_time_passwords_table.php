@@ -15,7 +15,7 @@ class CreateOneTimePasswordsTable extends Migration
     {
         Schema::create('tbl_one_time_passwords', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('otp')->unique();
+            $table->string('otp');
             $table->boolean('status')->default(false);
             $table->timestamps();
             $table->unsignedBigInteger('auth_mediator_id');

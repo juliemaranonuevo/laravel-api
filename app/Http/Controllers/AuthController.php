@@ -7,6 +7,8 @@ use App\Services\AuthService;
 use App\Dto\CredentialData;
 use App\Dto\UserData;
 use App\Dto\UserThirdPartyData;
+use App\Dto\OneTimePasswordData;
+use App\Dto\RegistrationCompletionData;
 use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
@@ -32,26 +34,20 @@ class AuthController extends Controller
 
     public function thirdPartyAuthenticate(Request $request): JsonResponse {
 
-        $userThirdPartyData = new UserThirdPartyData();
-        $userThirdPartyData->uId = $request->input('uId');
-        $userThirdPartyData->email = $request->input('email');
-        $userThirdPartyData->name = $request->input('name');
-        $userThirdPartyData->first_name = $request->input('first_name');
-        $userThirdPartyData->middle_name = $request->input('middle_name');
-        $userThirdPartyData->last_name = $request->input('last_name');
-        $userThirdPartyData->photo_url = $request->input('photo_url');
-        $userThirdPartyData->provider = $request->input('provider');
+        $userData = new UserData();
+        $userData->user_id = $request->input('user_id');
+        $userData->email = $request->input('email');
+        $userData->name = $request->input('name');
+        $userData->first_name = $request->input('first_name');
+        $userData->middle_name = $request->input('middle_name');
+        $userData->last_name = $request->input('last_name');
+        $userData->photo_url = $request->input('photo_url');
+        $userData->provider = $request->input('provider');
         
         // dd($userSocialData->uId);
-        $message = $this->authService->thirdPartyAuthenticate($userThirdPartyData);
+        $message = $this->authService->thirdPartyAuthenticate($userData);
 
         return $message;
-    }
-
-    public function logout(Request $request): JsonResponse {
-        $accountId = $request->input('accountId');
-        $isLogout = $this->authService->logout($accountId);
-        return response()->json($isLogout);
     }
 
     public function signupstore(Request $request): JsonResponse {
@@ -73,5 +69,34 @@ class AuthController extends Controller
         return $isExistsInAuth;
     }
 
-    
+    public function registrationCompletion(Request $request): JsonResponse {
+        $registrationCompletionData = new RegistrationCompletionData();
+        $registrationCompletionData->id = $request->input('auth_id');
+        $registrationCompletionData->email = $request->input('email');
+        $registrationCompletionData->phone_number = $request->input('phone_number');
+        
+        // dd($registrationCompletionData);
+        $message = $this->authService->registrationCompletion($registrationCompletionData);
+
+        return $message;
+    }
+
+    public function oneTimePasswordVerification(Request $request): JsonResponse {
+        $oneTimePasswordData = new OneTimePasswordData();
+        $oneTimePasswordData->id = $request->input('auth_id');
+        $oneTimePasswordData->email = $request->input('email');
+        $oneTimePasswordData->phone_number = $request->input('phone_number');
+        $oneTimePasswordData->one_time_password = $request->input('one_time_password');
+
+        // dd($oneTimePasswordData);
+        $message = $this->authService->oneTimePasswordVerification($oneTimePasswordData);
+
+        return $message;
+    }
+
+    public function logout(Request $request): JsonResponse {
+        $authId = $request->input('auth_id');
+        $isLogout = $this->authService->logout($authId);
+        return response()->json($isLogout);
+    }
 }

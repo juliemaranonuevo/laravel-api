@@ -20,8 +20,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', 'AuthController@authenticate');
 Route::post('/login/social', 'AuthController@thirdPartyAuthenticate');
+Route::post('/registration-completion', 'AuthController@registrationCompletion');
 Route::post('/logout', 'AuthController@logout');
 
 Route::post('/users/create', 'AuthController@signupstore');
 Route::get('/users/create', 'AuthController@isExistsInAuth');
+Route::post('/users/create/one-time-password', 'AuthController@oneTimePasswordVerification');
 
