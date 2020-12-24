@@ -23,7 +23,7 @@ class AuthController extends Controller
     public function authenticate(Request $request): JsonResponse {
         $user = new CredentialData();
         // $user->email = $request->input('email');
-
+        return response()->json($request);
         $user->email_username = $request->input('email_username');
         $user->password = $request->input('password');
         
